@@ -9,21 +9,23 @@ public sealed class CustomButton : MonoBehaviour, IPointerClickHandler
     [SerializeField] private string _pressedAnimationName = "Pressed";
     
     private Animator _animator;
-    private ParticleSystem _particleSystem;
     private AudioSource _audioSource;
+    private ParticleSystemMediator _particleSystemMediator;
 
     public void OnPointerClick(PointerEventData eventData)
     {
         PlayAnimator();
-        PlayParticles();
+        ReplayParticles();
         PlayAudio();
     }
 
-    private void Awake()
+    public void Initialize(ParticleSystemMediator particleSystemMediator)
     {
         _animator = GetComponent<Animator>();
-        _particleSystem = GetComponent<ParticleSystem>();
+        var localParticleSystem = GetComponent<ParticleSystem>();
         _audioSource = GetComponent<AudioSource>();
+        _particleSystemMediator = particleSystemMediator;
+        _particleSystemMediator.AddSystem(localParticleSystem);
     }
 
     private void PlayAnimator()
@@ -32,11 +34,9 @@ public sealed class CustomButton : MonoBehaviour, IPointerClickHandler
         _animator.Play(_pressedAnimationName);
     }
     
-    private void PlayParticles()
+    private void ReplayParticles()
     {
-        _particleSystem.Stop();
-        _particleSystem.Clear();
-        _particleSystem.Play();
+        _particleSystemMediator.ReplayParticles();
     }
     
     private void PlayAudio()
